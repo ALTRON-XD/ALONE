@@ -1,11 +1,10 @@
-
 import sys
 import traceback
 from functools import wraps
 
 from pyrogram.errors.exceptions.forbidden_403 import ChatWriteForbidden
 
-from KRISTY import ERROR_LOG, pbot as app
+from KRISTY import OWNER_ID, pbot
 
 
 def split_limits(text):
@@ -33,12 +32,11 @@ def capture_err(func):
         try:
             return await func(client, message, *args, **kwargs)
         except ChatWriteForbidden:
-            await app.leave_chat(message.chat.id)
             return
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             errors = traceback.format_exception(
-                etype=exc_type,
+                exc_type,
                 value=exc_obj,
                 tb=exc_tb,
             )
@@ -51,7 +49,7 @@ def capture_err(func):
                 ),
             )
             for x in error_feedback:
-                await app.send_message(ERROR_LOG, x)
+                await pbot.send_message(OWNER_ID, x)
             raise err
 
     return capture
